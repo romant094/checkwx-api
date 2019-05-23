@@ -1,19 +1,24 @@
 const d = document,
     fetchBtn = d.querySelector('#fetch-btn'),
     infoBlock = d.querySelector('.information'),
-    errorBlock = d.querySelector('.error');
+    errorBlock = d.querySelector('.error'),
+    codeInput = d.querySelector('#airport-id');
 
 const _url = 'https://api.checkwx.com';
 const _apiKey = 'ef56bcec85ea6dc0afbe008abc';
 
 fetchBtn.addEventListener('click', makeQuery);
+codeInput.addEventListener('keyup', function (e) {
+    if (e.which === 13) {
+        makeQuery();
+    }
+});
 
 function makeQuery() {
-    const code = d.querySelector('#airport-id').value;
     const query = ['metar', 'taf'];
 
     query.forEach((q) => {
-        fetch(`${_url}/${q}/${code}/decoded`, {
+        fetch(`${_url}/${q}/${codeInput.value}/decoded`, {
             headers: {
                 'x-api-key': _apiKey
             }
@@ -38,6 +43,7 @@ function makeQuery() {
             })
             .catch(e => {
                 console.log(e);
+                showInfo(false);
             });
     });
 }
