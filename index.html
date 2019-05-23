@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <title>Title</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+        .disabled{
+            display: none;
+        }
+        .jumbotron{
+            padding: 2rem;
+        }
+    </style>
 </head>
 <body>
 <main class="mt-5">
@@ -12,29 +20,39 @@
             <div>
                 <label class="text-center">
                     <span>Введите код аэропорта</span>
-                    <input type="text" class="form-control" id="airport-id">
+                    <input type="text" class="form-control" id="airport-id" value="uuee">
                 </label>
             </div>
             <div>
                 <button class="btn btn-primary" id="fetch-btn">Показать</button>
             </div>
         </div>
-        <div class="d-flex">
-            <div class="col-6">
+        <div class="information disabled">
+            <div class="col-12 airport">
                 <div class="jumbotron">
-                    <h4 class="text-center">METAR</h4>
-                    <div class="metar"></div>
+                    <h4>Аэропорт</h4>
+                    <div class="info"></div>
                 </div>
             </div>
-            <div class="col-6">
-                <div class="jumbotron">
-                    <h4 class="text-center">TAF</h4>
-                    <div class="taf"></div>
+            <div class="d-flex">
+                <div class="col-6 metar">
+                    <div class="jumbotron">
+                        <h4 class="text-center">METAR</h4>
+                        <div class="info"></div>
+                    </div>
+                </div>
+                <div class="col-6 taf">
+                    <div class="jumbotron">
+                        <h4 class="text-center">TAF</h4>
+                        <div class="info"></div>
+                    </div>
                 </div>
             </div>
-
-
         </div>
+        <div class="error alert alert-danger disabled">
+            Информация временно недоступна
+        </div>
+
 
     </div>
 </main>
