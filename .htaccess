@@ -1,0 +1,19 @@
+RewriteEngine On 
+
+# Подмена корневого каталога
+RewriteBase /
+
+# Подмена http на https
+RewriteCond %{HTTP:X-Forwarded-Proto} !https
+RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+# Склейка www и https
+RewriteCond %{HTTP_HOST} ^www\.(.*) [NC]
+RewriteRule ^/?(.*) https://%1/$1 [L,R=permanent]
+
+# Склейка index с корнем сайта
+RewriteCond %{THE_REQUEST} ^[A-Z]{3,9}\ /index\.(php|html|htm)\ HTTP/ 
+RewriteRule ^(.*)index\.(php|html|htm)$ $1 [R=301,L]
+
+# Запрет на просмотр файлов в каталоге сайта
+Options -Indexes
