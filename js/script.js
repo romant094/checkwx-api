@@ -177,7 +177,7 @@ function metarDecr(metar) {
                 target = metar[props.metarProp][prop.name];
             }
 
-            if (target) {
+            if (target && prop.name) {
                 switch (prop.name) {
                     case 'base_feet_agl':
                         break;
