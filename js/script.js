@@ -1,3 +1,22 @@
+// TODO delete test data and all usage of it
+let testData = {
+    "wind": {"degrees": 230, "speed_kts": 17, "speed_mph": 20, "speed_mps": 9},
+    "temperature": {"celsius": 26, "fahrenheit": 79},
+    "dewpoint": {"celsius": 14, "fahrenheit": 57},
+    "humidity": {"percent": 48},
+    "barometer": {"hg": 30, "hpa": 1016, "kpa": 101.59, "mb": 1015.92},
+    "visibility": {"miles": "Greater than 6", "miles_float": 6.21, "meters": "10,000+", "meters_float": 10000},
+    "elevation": {"feet": 623.36, "meters": 190},
+    "location": {"coordinates": [37.4146, 55.972599], "type": "Point"},
+    "icao": "UUEE",
+    "observed": "2019-05-30T11:30:00.000Z",
+    "raw_text": "UUEE 301130Z 23009MPS 9999 SCT053TCU 26/14 Q1016 R24L/CLRD62 R24C/CLRD62 TEMPO 24010G15MPS 3100 -TSRA BKN012CB",
+    "station": {"name": "Sheremetyevo International"},
+    "clouds": [{"code": "SCT", "text": "Scattered", "base_feet_agl": 5300, "base_meters_agl": 1615.44}],
+    "flight_category": "VFR",
+    "conditions": [{"code": "RA"}, {"code": "SN"}]
+};
+
 const d = document,
     fetchBtn = d.querySelector('#fetch-btn'),
     infoBlock = d.querySelector('.information'),
@@ -25,6 +44,10 @@ const _dictionary = {
         OVC: 'сплошная',
         CB: 'кучево-дождевая',
         CAVOK: 'условия хорошие'
+    },
+    // TODO Fill in conditions object
+    conditions: {
+        RASN: 'дождь со снегом'
     }
 };
 
@@ -66,6 +89,14 @@ const _propSequense = [
                 name: 'code',
                 prefix: '',
                 postfix: ''
+            }
+        ]
+    },
+    {
+        metarProp: 'conditions',
+        neededProps: [
+            {
+                name: 'code'
             }
         ]
     },
@@ -123,8 +154,6 @@ function makeQuery() {
                 const outputBlock = metarDecBlock.querySelector(' .info');
                 const data = res.data[0];
 
-                if (q === 'metar') console.log(data);
-
                 if (data) {
                     showInfo(true);
                     const weather = d.querySelector('.' + q + ' .info');
@@ -137,6 +166,7 @@ function makeQuery() {
                     airport.textContent = `[${icao.toUpperCase()}] ${name}`;
 
                     if (q === 'metar') outputBlock.textContent = metarDecr(data);
+                    // if (q === 'metar') outputBlock.textContent = metarDecr(testData);
                 } else {
                     showInfo(false);
                 }
@@ -163,21 +193,32 @@ function showInfo(param) {
 }
 
 function metarDecr(metar) {
+    console.log(metar);
+
     let outputString = '';
     _propSequense.forEach((props) => {
         props.neededProps.forEach((prop) => {
-            let target, localString = '';
+            let target = '', localString = '', lastIndex = -1;
             const {prefix, postfix} = prop;
-            // console.log(prop);
+            const metarProp = props.metarProp;
 
-            if (props.metarProp === 'clouds' || props.metarProp === 'conditions') {
-                let lastIndex = metar[props.metarProp].length - 1;
-                target = metar[props.metarProp][lastIndex][prop.name];
+
+            if (Array.isArray(metar[metarProp])) {
+                lastIndex = metar[metarProp].length - 1;
+
+                switch (metarProp) {
+                    case 'clouds':
+                        target = metar[metarProp][lastIndex][prop.name];
+                        break;
+                    case 'conditions':
+                        metar[metarProp].forEach(item => target += item.code);
+                        break;
+                }
             } else {
-                target = metar[props.metarProp][prop.name];
+                target = metar[metarProp][prop.name];
             }
 
-            if (target && prop.name) {
+            if (prop.name) {
                 switch (prop.name) {
                     case 'base_feet_agl':
                         break;
@@ -185,7 +226,11 @@ function metarDecr(metar) {
                         if (target === 'CAVOK') {
                             localString = `${_dictionary.clouds[target]}. `;
                         } else {
-                            localString = `облачность ${_dictionary.clouds[target]} на высоте ${metar[props.metarProp][0].base_feet_agl}'. `;
+                            if (metarProp === 'clouds') {
+                                localString = `облачность ${_dictionary.clouds[target]} на высоте ${metar[props.metarProp][lastIndex].base_feet_agl}'. `;
+                            } else {
+                                localString = `${_dictionary.conditions[target]}. `;
+                            }
                         }
                         break;
                     case 'meters_float':
@@ -194,9 +239,11 @@ function metarDecr(metar) {
                         localString = metFormat(prefix, target, postfix);
                         break;
                     default:
-                        localString += metFormat(prefix, target, postfix);
+                        localString = metFormat(prefix, target, postfix);
+                        break;
                 }
             }
+
             outputString += localString;
         });
     });
