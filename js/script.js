@@ -14,7 +14,7 @@ let testData = {
     "station": {"name": "Sheremetyevo International"},
     "clouds": [{"code": "SCT", "text": "Scattered", "base_feet_agl": 5300, "base_meters_agl": 1615.44}],
     "flight_category": "VFR",
-    "conditions": [{"code": "RA"}, {"code": "SN"}]
+    "conditions": [{code:'SHRA'}]
 };
 
 const d = document,
@@ -47,7 +47,41 @@ const _dictionary = {
     },
     // TODO Fill in conditions object
     conditions: {
-        RASN: 'дождь со снегом'
+        VCFG: 'туман на расстоянии',
+        FZFG: 'переохлаждённый туман',
+        MIFG: 'туман поземный',
+        PRFG: 'туман просвечивающий',
+        FG: 'туман',
+        BR: 'дымка',
+        HZ: 'мгла',
+        FU: 'дым',
+        DS: 'пыльная буря',
+        SS: 'песчаная буря',
+        DRSA: 'песчаный позёмок',
+        DRDU: 'пыльный позёмок',
+        DU: 'пыль в воздухе (пыльная мгла)',
+        DRSN: 'снежный позёмок',
+        BLSN: 'метель',
+        RASN: 'дождь со снегом',
+        SNRA: 'снег с дождём',
+        SHSN: 'ливневой снег',
+        SHRA: 'ливневой дождь',
+        DZ: 'морось',
+        SG: 'снежные зёрна',
+        RA: 'дождь',
+        SN: 'снег',
+        IC: 'ледяные иглы',
+        PE: 'ледяной дождь (гололёд)',
+        GS: 'ледяная крупа (гололёд)',
+        FZRA: 'переохлаждённый дождь (гололёд)',
+        FZDZ: 'переохлаждённая морось (гололёд)',
+        TSRA: 'гроза с дождём',
+        TSGR: 'гроза с градом',
+        TSGS: 'гроза, слабый град',
+        TSSN: 'гроза со снегом',
+        TS: 'гроза без осадков',
+        SQ: 'шквал',
+        GR: 'град'
     }
 };
 
@@ -78,6 +112,14 @@ const _propSequense = [
         ]
     },
     {
+        metarProp: 'conditions',
+        neededProps: [
+            {
+                name: 'code'
+            }
+        ]
+    },
+    {
         metarProp: 'clouds',
         neededProps: [
             {
@@ -89,14 +131,6 @@ const _propSequense = [
                 name: 'code',
                 prefix: '',
                 postfix: ''
-            }
-        ]
-    },
-    {
-        metarProp: 'conditions',
-        neededProps: [
-            {
-                name: 'code'
             }
         ]
     },
@@ -165,8 +199,8 @@ function makeQuery() {
                     const {icao} = data;
                     airport.textContent = `[${icao.toUpperCase()}] ${name}`;
 
-                    if (q === 'metar') outputBlock.textContent = metarDecr(data);
-                    // if (q === 'metar') outputBlock.textContent = metarDecr(testData);
+                    // if (q === 'metar') outputBlock.textContent = metarDecr(data);
+                    if (q === 'metar') outputBlock.textContent = metarDecr(testData);
                 } else {
                     showInfo(false);
                 }
@@ -202,7 +236,6 @@ function metarDecr(metar) {
             const {prefix, postfix} = prop;
             const metarProp = props.metarProp;
 
-
             if (Array.isArray(metar[metarProp])) {
                 lastIndex = metar[metarProp].length - 1;
 
@@ -211,7 +244,9 @@ function metarDecr(metar) {
                         target = metar[metarProp][lastIndex][prop.name];
                         break;
                     case 'conditions':
-                        metar[metarProp].forEach(item => target += item.code);
+                        if (metar[metarProp].length > 0) {
+                            metar[metarProp].forEach(item => target += item.code)
+                        }
                         break;
                 }
             } else {
@@ -229,7 +264,9 @@ function metarDecr(metar) {
                             if (metarProp === 'clouds') {
                                 localString = `облачность ${_dictionary.clouds[target]} на высоте ${metar[props.metarProp][lastIndex].base_feet_agl}'. `;
                             } else {
-                                localString = `${_dictionary.conditions[target]}. `;
+                                if (target !== '') {
+                                    localString = `${_dictionary.conditions[target]}. `
+                                }
                             }
                         }
                         break;
